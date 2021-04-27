@@ -117,9 +117,9 @@ public class Smart_main {
         vect_command[4] = 0x06;
         vect_command[5] = (byte) 0x80;  // 128 octets
         vect_command[6] = 0x01;  // 1 enregistrement
-        vect_command[7] = 0x00;
+        vect_command[7] = 0x00;//read
         //=1000
-        vect_command[8] = 0x00;// security attribute for write
+        vect_command[8] = (byte) 0x80;// security attribute for write 1000 0000 (IC_code)
         vect_command[9] = (byte)0xAA;
         vect_command[10] = 0x11;
         smartCard.writeFile(vect_command);
@@ -140,7 +140,6 @@ public class Smart_main {
             vect_command [5+ j] = nom_b [j ];
         smartCard.checkIc_Code();
         smartCard.writeFile(vect_command);
-        smartCard.checkIc_Code();
         ///////////////////////////////////////////////
         byte[] read_record ={(byte) 0x80 , (byte) 0xB2 , 0x00 ,
                     0x00 , (byte) file_AA11.length() };
