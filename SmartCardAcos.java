@@ -92,6 +92,16 @@ public class SmartCardAcos {
         ResponseAPDU rep = SmartCardAcos.canal.transmit(SubmitAPDU);
         return  rep;
     }
+    public void checkPincode() throws CardException {
+        CommandAPDU SubmitAPDU = new CommandAPDU(APDU_PIN_CODE);
+        ResponseAPDU rep = canal.transmit(SubmitAPDU);
+
+        if (rep.getSW() == 0x9000){
+            System.out.println(" Ok, PIN code verified !");
+        }
+        else
+            System.out.println(" Error, PIN code not verified! ( 0x"+Integer.toHexString(rep.getSW())+")");
+    }
     public void changePinCode(byte [] PIN_CODE) throws CardException {
         selectFile((byte) 0xFF,(byte) 0x03,0x9000);
         //write record (my name) in user file
@@ -114,4 +124,5 @@ public class SmartCardAcos {
         else
             System.out.println(" Error, PIN code not verified! ( 0x"+Integer.toHexString(rep.getSW())+")");
     }
+
 }
