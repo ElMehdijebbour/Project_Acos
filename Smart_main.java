@@ -1,5 +1,8 @@
 package projet_sesnum;
 import javax.smartcardio.*;
+import java.io.IOException;
+import java.security.NoSuchAlgorithmException;
+
 public class Smart_main {
     private static byte [] APDU_IC_CODE = {(byte) 0x80,0x20,0x07,0x00, 0x08, 0x41, 0x43, 0x4F, 0x53, 0x54, 0x45, 0x53, 0x54};
     private static byte [] APDU_PIN_CODE = {(byte) 0x80,0x20,0x06,0x00, 0x08,0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08};
@@ -7,7 +10,7 @@ public class Smart_main {
     private static byte [] PIN_CODE = {0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08};
     private  static  int SW_system_files=  0x9000;
     private  static  int SW_user_files=  0x9100;
-    public static void main(String[] args) throws CardException {
+    public static void main(String[] args) throws CardException, NoSuchAlgorithmException, IOException {
         //phase1 : Setup
         System.out.println("Phase 1 starting now");
         CardTerminal lecteur = lecteur();
@@ -49,7 +52,7 @@ public class Smart_main {
         vect_command[5] = 0x20;  // 32 octets
         vect_command[6] = 0x04;  // 4 enregistrements
         vect_command[7] = 0x00;
-        vect_command[8] = 0x00;
+        vect_command[8] = (byte) 0x00; //1000
         vect_command[9] = (byte)0xAA;
         vect_command[10] = 0x10;
         smartCard.writeFile(vect_command);
@@ -79,6 +82,7 @@ public class Smart_main {
                 vect_command [5+ j] = nom_b [j ];
             smartCard.writeFile(vect_command);
         }
+        String msg_chiff ="";
         for (i =0; i <4; i ++) {
             byte[] read_record ={(byte) 0x80 , (byte) 0xB2 , (byte) i ,
                     0x00 , (byte) file_AA10 [ i ].length() };
@@ -88,8 +92,12 @@ public class Smart_main {
             {
                 System . out . print (" Ok read file AA10 ,"+table[i]+":");
                 System . out . println (new String ( rep . getData () ));
+                msg_chiff+=new String ( rep . getData () );
             }
         }
+
+        Md5.writedata(msg_chiff);
+        System . out . println ("hash:" + msg_chiff);
         card . disconnect (true);
         //phase 5: changing password
         card = check_card(lecteur);
@@ -119,14 +127,19 @@ public class Smart_main {
         vect_command[6] = 0x01;  // 1 enregistrement
         vect_command[7] = 0x00;//read
         //=1000
-        vect_command[8] = (byte) 0x80;// security attribute for write 1000 0000 (IC_code)
+        vect_command[8] = (byte) 0x00;// security attribute for write 1000 0000 (IC_code)
         vect_command[9] = (byte)0xAA;
         vect_command[10] = 0x11;
         smartCard.writeFile(vect_command);
         System.out.println("AA11");
         //
+        //String msg_chiff=Md5.get_hash();
+        //read record and concatenate it + hash
+        smartCard.checkIc_Code();
+
+
         smartCard.selectFile((byte) 0xAA, (byte) 0x11,SW_user_files);
-        String  file_AA11 = "009bd1ba4186ceb2940300000000cbd70a";
+        String  file_AA11 = Md5.get_hash();
         String  label = "signature";
         System.out.println("noice");
         byte[] nom_b =  file_AA11. getBytes () ;
@@ -151,6 +164,7 @@ public class Smart_main {
                 System . out . println (new String ( rep . getData () ));
             }
         else System . out . print ("can't read");
+
     }
     private static Card check_card(CardTerminal lecteur) throws CardException {
         Card card = null;
