@@ -1,7 +1,5 @@
 package projet_sesnum;
-
 import javax.smartcardio.*;
-
 public class SmartCardAcos {
     static CardTerminal lecteur ;
     Card card ;
@@ -124,5 +122,4 @@ public class SmartCardAcos {
         else
             System.out.println(" Error, PIN code not verified! ( 0x"+Integer.toHexString(rep.getSW())+")");
     }
-
 }
