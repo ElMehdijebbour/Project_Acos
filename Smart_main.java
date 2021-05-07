@@ -95,7 +95,6 @@ public class Smart_main {
                 data+=new String ( rep . getData () );
             }
         }
-
         Linker.writedata(data);
         System . out . println ("donnes concatene:" + data);
         card . disconnect (true);
@@ -162,9 +161,9 @@ public class Smart_main {
         vect_command[2] = 0x00;
         vect_command[3] = 0x00;
         vect_command[4] = 0x06;
-        vect_command[5] = (byte) file_AA12.length();  // 32 octets
-        vect_command[6] = 0x01;  // 4 enregistrements
-        vect_command[7] = (byte) 0x40;
+        vect_command[5] = (byte) file_AA12.length();
+        vect_command[6] = 0x01;
+        vect_command[7] = (byte) 0x40;// security pin code
         vect_command[8] = (byte) 0x80; //1000
         vect_command[9] = (byte)0xAA;
         vect_command[10] = 0x12;

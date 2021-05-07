@@ -36,13 +36,12 @@ class Linker
         String fileName = "C:\\Users\\Mehdi\\IdeaProjects\\ACOS3_SESnum\\src\\projet_sesnum\\security\\keys\\keys\\rsapublickey.pem";
         File file = new File(fileName);
         String key = new String(Files.readAllBytes(file.toPath()), Charset.defaultCharset());
-
         return  key;
     }
 
     public static void writedata(String data){
         try {
-            String path ="data.txt";
+            String path ="C:\\Users\\Mehdi\\IdeaProjects\\ACOS3_SESnum\\src\\projet_sesnum\\data\\data.txt";
             File myObj = new File(path);
             if (myObj.createNewFile()) {
                 System.out.println("File created: " + myObj.getName());
