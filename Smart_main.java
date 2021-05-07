@@ -51,7 +51,7 @@ public class Smart_main {
         vect_command[4] = 0x06;
         vect_command[5] = 0x20;  // 32 octets
         vect_command[6] = 0x04;  // 4 enregistrements
-        vect_command[7] = 0x00;
+        vect_command[7] = (byte) 0x80;
         vect_command[8] = (byte) 0x00; //1000
         vect_command[9] = (byte)0xAA;
         vect_command[10] = 0x10;
@@ -59,8 +59,8 @@ public class Smart_main {
         //phase 4:
         smartCard.selectFile((byte) 0xAA, (byte) 0x10,SW_user_files);
         String [] file_AA10 = new String [4];
-        file_AA10 [0]= " Mr";
-        file_AA10 [1]= " El Mehdi Jebbour";
+        file_AA10 [0]= " M";
+        file_AA10 [1]= " JebbourDabachFigdal";
         file_AA10 [2]= " ID200130";
         file_AA10 [3]= " 24/4/2021";
         String [] table = new String [4];
@@ -82,7 +82,7 @@ public class Smart_main {
                 vect_command [5+ j] = nom_b [j ];
             smartCard.writeFile(vect_command);
         }
-        String msg_chiff ="";
+        String data ="";
         for (i =0; i <4; i ++) {
             byte[] read_record ={(byte) 0x80 , (byte) 0xB2 , (byte) i ,
                     0x00 , (byte) file_AA10 [ i ].length() };
@@ -92,12 +92,12 @@ public class Smart_main {
             {
                 System . out . print (" Ok read file AA10 ,"+table[i]+":");
                 System . out . println (new String ( rep . getData () ));
-                msg_chiff+=new String ( rep . getData () );
+                data+=new String ( rep . getData () );
             }
         }
 
-        Md5.writedata(msg_chiff);
-        System . out . println ("hash:" + msg_chiff);
+        Linker.writedata(data);
+        System . out . println ("donnes concatene:" + data);
         card . disconnect (true);
         //phase 5: changing password
         card = check_card(lecteur);
@@ -116,6 +116,9 @@ public class Smart_main {
         smartCard.setCard(card);
         smartCard.setCanal(canal);
         smartCard.checkIc_Code();
+        byte[] nom_b =  Linker.get_pem();
+        String  label = "signature";
+        System.out.println(nom_b.length);
         smartCard.selectFile( (byte) 0xFF, (byte) 0x04,SW_system_files);
         vect_command = new byte[11];
         vect_command[0] = (byte) 0x80;
@@ -123,11 +126,11 @@ public class Smart_main {
         vect_command[2] = 0x00;
         vect_command[3] = 0x00;
         vect_command[4] = 0x06;
-        vect_command[5] = (byte) 0x80;  // 128 octets
+        vect_command[5] = (byte) nom_b.length;  // 128 octets
         vect_command[6] = 0x01;  // 1 enregistrement
         vect_command[7] = 0x00;//read
         //=1000
-        vect_command[8] = (byte) 0x00;// security attribute for write 1000 0000 (IC_code)
+        vect_command[8] = (byte) 0x80;// security attribute for write 1000 0000 (IC_code)
         vect_command[9] = (byte)0xAA;
         vect_command[10] = 0x11;
         smartCard.writeFile(vect_command);
@@ -136,34 +139,62 @@ public class Smart_main {
         //String msg_chiff=Md5.get_hash();
         //read record and concatenate it + hash
         smartCard.checkIc_Code();
-
-
         smartCard.selectFile((byte) 0xAA, (byte) 0x11,SW_user_files);
-        String  file_AA11 = Md5.get_hash();
-        String  label = "signature";
-        System.out.println("noice");
-        byte[] nom_b =  file_AA11. getBytes () ;
-        vect_command =new byte[5+file_AA11.length()];
+
+
+        vect_command =new byte[5+nom_b.length];
         vect_command [0]=(byte) 0x80;
         vect_command [1]=(byte) 0xD2;
         vect_command [2]=0x00; //numero d'enregistrement
         vect_command [3]=0x00 ;
-        vect_command [4]=(byte) file_AA11.length();
+        vect_command [4]=(byte) nom_b.length;
         for ( int j =0; j < nom_b . length ; j ++)
             vect_command [5+ j] = nom_b [j ];
         smartCard.checkIc_Code();
         smartCard.writeFile(vect_command);
-        ///////////////////////////////////////////////
-        byte[] read_record ={(byte) 0x80 , (byte) 0xB2 , 0x00 ,
-                    0x00 , (byte) file_AA11.length() };
+        ///////////////////////////////////////////////////////////////////////////////////////
+        String file_AA12 =Linker.getPempls();
+        System.out.println(file_AA12);
+        smartCard.selectFile( (byte) 0xFF, (byte) 0x04,SW_system_files);
+        vect_command = new byte[11];
+        vect_command[0] = (byte) 0x80;
+        vect_command[1] = (byte)0xD2;
+        vect_command[2] = 0x00;
+        vect_command[3] = 0x00;
+        vect_command[4] = 0x06;
+        vect_command[5] = (byte) file_AA12.length();  // 32 octets
+        vect_command[6] = 0x01;  // 4 enregistrements
+        vect_command[7] = (byte) 0x40;
+        vect_command[8] = (byte) 0x80; //1000
+        vect_command[9] = (byte)0xAA;
+        vect_command[10] = 0x12;
+        smartCard.writeFile(vect_command);
+        //phase 4:
+
+        smartCard.selectFile((byte) 0xAA, (byte) 0x12,SW_user_files);
+        byte[] nom_c =  file_AA12. getBytes () ;
+        vect_command =new byte[5+file_AA12.length()];
+        vect_command [0]=(byte) 0x80;
+        vect_command [1]=(byte) 0xD2;
+        vect_command [2]=(byte) 0x00; //numero d'enregistrement
+        vect_command [3]=0x00 ;
+        vect_command [4]=(byte) file_AA12.length();
+        for ( int j =0; j < nom_c . length ; j ++)
+            vect_command [5+ j] = nom_c [j ];
+        smartCard.writeFile(vect_command);
+
+
+        System.out.println("done");
+        smartCard.checkPincode();
+        byte[] read_record ={(byte) 0x80 , (byte) 0xB2 , (byte) 0x00 ,
+                0x00 , (byte) file_AA12.length() };
         CommandAPDU Read_APDU = new CommandAPDU ( read_record );
         ResponseAPDU rep = canal . transmit ( Read_APDU ) ;
         if ( rep . getSW () == 0x9000 )
-            {
-                System . out . print (" Ok read file AA11 ,"+label+":");
-                System . out . println (new String ( rep . getData () ));
-            }
-        else System . out . print ("can't read");
+        {
+            System . out . print (" Ok read file AA12 "+":\n");
+            System . out . println (new String(rep.getData()));
+        }
 
     }
     private static Card check_card(CardTerminal lecteur) throws CardException {
