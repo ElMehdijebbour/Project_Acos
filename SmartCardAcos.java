@@ -22,11 +22,11 @@ public class SmartCardAcos {
         this.card = card;
     }
 
-    public static void setApduIcCode(byte[] apduIcCode) {
+    public  void setApduIcCode(byte[] apduIcCode) {
         APDU_IC_CODE = apduIcCode;
     }
 
-    public static void setApduPinCode(byte[] apduPinCode) {
+    public  void setApduPinCode(byte[] apduPinCode) {
         APDU_PIN_CODE = apduPinCode;
     }
 
@@ -37,21 +37,14 @@ public class SmartCardAcos {
         this.canal = canal;
     }
 
-    static  void selectFile(byte one, byte two, int SW) throws CardException {
-        byte[] select_command = new byte[7];
-        select_command[0] = (byte) 0x80;
-        select_command[1] = (byte)0xA4;
-        select_command[2] = 0x00;
-        select_command[3] = 0x00;
-        select_command[4] = 0x02;
-        select_command[5] =  one;
-        select_command[6] = two;
+    public static void selectFile(byte one, byte two, int SW) throws CardException {
+       byte [] select_command = {(byte)0x80,(byte)0xA4,(byte)0x00,(byte)0x00,(byte)0x02,(byte) one,(byte) two};
         ResponseAPDU rep =submit_APDU(select_command);
         if (rep.getSW() == SW){
             System.out.println(" Ok," + String.format("0x%02X", one)+String.format("%02X", two) + " Selected !");
         }
         else
-            System.out.println(" Error, FF02 not Selected!(0x" + Integer.toHexString(rep.getSW())+")");
+            System.out.println(" Error, not Selected!(0x" + Integer.toHexString(rep.getSW())+")");
     }
     static  void writeFile(byte[] vect_command) throws CardException {
         ResponseAPDU rep =submit_APDU(vect_command);
@@ -61,8 +54,26 @@ public class SmartCardAcos {
         else
             System.out.println(" Error, couldn't write!(0x" + Integer.toHexString(rep.getSW())+")");
     }
+    public static void CreateFile(int length, int num_enr,int n_of, int security_read, int security_write, int n1, int n2 ) throws CardException {
+        byte[] vect_command;
+        selectFile((byte) 0xFF, (byte) 0x04, 0x9000);
+        vect_command = new byte[11];
+        vect_command[0] = (byte) 0x80;
+        vect_command[1] = (byte) 0xD2;
+        vect_command[2] = (byte) n_of;
+        vect_command[3] = 0x00;
+        vect_command[4] = 0x06;
+        vect_command[5] = (byte) length;  // 32 octets
+        vect_command[6] = (byte) num_enr;  // 4 enregistrements
+        vect_command[7] = (byte) security_read;
+        vect_command[8] =  (byte) security_write; //1000
+        vect_command[9] = (byte) n1;
+        vect_command[10] =  (byte) n2;
+        writeFile(vect_command);
+        System.out.println(" file created");
 
-    static void checkIc_Code() throws CardException {
+    }
+    public static void checkIc_Code() throws CardException {
         /**Fonction pour envoyer le code administrateur IC (Issuer Code)
          *  affin de se donner la permission de modifier le contenu des fichiers systèmes ;
          **/

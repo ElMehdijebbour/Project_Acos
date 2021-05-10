@@ -14,7 +14,7 @@ class Linker
         get_hash();
     }
     public static String get_hash() throws NoSuchAlgorithmException, IOException {
-        String fileName = "C:\\Users\\Mehdi\\IdeaProjects\\ACOS3_SESnum\\src\\projet_sesnum\\signature.bin";
+        String fileName = "src\\projet_sesnum\\signature.bin";
         File file = new File(fileName);
         byte [] fileBytes = Files.readAllBytes(file.toPath());
         StringBuffer hexString = new StringBuffer();
@@ -27,22 +27,23 @@ class Linker
         return  hexString.toString();
     }
     public static byte[] get_pem() throws NoSuchAlgorithmException, IOException {
-        String fileName = "C:\\Users\\Mehdi\\IdeaProjects\\ACOS3_SESnum\\src\\projet_sesnum\\security\\signature\\signature.bin";
+        String fileName = "src\\projet_sesnum\\security\\signature\\signature.bin";
         File file = new File(fileName);
         byte [] fileBytes = Files.readAllBytes(file.toPath());
         return  fileBytes;
     }
-    public static String getPempls() throws NoSuchAlgorithmException, IOException {
-        String fileName = "C:\\Users\\Mehdi\\IdeaProjects\\ACOS3_SESnum\\src\\projet_sesnum\\security\\keys\\keys\\rsapublickey.pem";
+    public static String getPublicKey() throws NoSuchAlgorithmException, IOException {
+        String fileName = "src/projet_sesnum/security/keys/keys/rsapublickey.pem";
         File file = new File(fileName);
-        String key = new String(Files.readAllBytes(file.toPath()), Charset.defaultCharset());
 
+        String pem = new String(Files.readAllBytes(file.toPath()), Charset.defaultCharset());
+        String key=new String(pem.substring(pem.indexOf("\n")+1, pem.lastIndexOf("\n-----END PUBLIC KEY-----"))).replace("\n", "");
         return  key;
     }
 
     public static void writedata(String data){
         try {
-            String path ="data.txt";
+            String path ="src\\projet_sesnum\\data\\data.txt";
             File myObj = new File(path);
             if (myObj.createNewFile()) {
                 System.out.println("File created: " + myObj.getName());
