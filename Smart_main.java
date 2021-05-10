@@ -1,10 +1,12 @@
 package projet_sesnum;
+
 import javax.smartcardio.*;
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 
 public class Smart_main {
-    private static byte [] APDU_IC_CODE = {(byte) 0x80,0x20,0x07,0x00, 0x08, 0x41, 0x43, 0x4F, 0x53, 0x54, 0x45, 0x53, 0x54};
+    private static byte [] APDU_IC_CODE = {(byte)0x80,(byte)0x20,(byte)0x07,(byte)0x00,(byte)0x08,0x41, 0x43, 0x4F, 0X53, 0x54, 0x45, 0x53, 0x54};
+
     private static byte [] APDU_PIN_CODE = {(byte) 0x80,0x20,0x06,0x00, 0x08,0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08};
     /**Constants**/
     private static byte [] PIN_CODE = {0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08};
@@ -21,18 +23,11 @@ public class Smart_main {
         smartCard.clearCard();
         //phase 2 : write n of files to create to FF02 aka le fichier de personnalisation
         System.out.println("Phase 2 starting now");
-        smartCard.selectFile((byte) 0xFF, (byte) 0x02,SW_system_files);
+        smartCard.setApduIcCode(APDU_IC_CODE);
         smartCard.checkIc_Code();
-        byte[] vect_command = new byte[9];
-        vect_command[0] = (byte) 0x80;
-        vect_command[1] = (byte)0xD2;
-        vect_command[2] = 0x00; //premier enregistrement
-        vect_command[3] = 0x00;
-        vect_command[4] = 0x04;
-        vect_command[5] = 0x00;
-        vect_command[6] = 0x00;
-        vect_command[7] = 0x03;   //--> N_OF_File
-        vect_command[8] = 0x00;
+        smartCard.selectFile((byte) 0xFF, (byte) 0x02,SW_system_files);
+        byte[] vect_command={(byte) 0x80, (byte) 0xD2, 0x00, 0x00, 0x04, 0x00, 0x00, 0x03, 0x00};
+
         smartCard.writeFile(vect_command);
         card.disconnect(true);
         //phase 3 : changing FF04
@@ -42,20 +37,11 @@ public class Smart_main {
         smartCard.setCard(card);
         smartCard.setCanal(canal);
         smartCard.checkIc_Code();
-        smartCard.selectFile( (byte) 0xFF, (byte) 0x04,SW_system_files);
-        vect_command = new byte[11];
-        vect_command[0] = (byte) 0x80;
-        vect_command[1] = (byte)0xD2;
-        vect_command[2] = 0x00;
-        vect_command[3] = 0x00;
-        vect_command[4] = 0x06;
-        vect_command[5] = 0x20;  // 32 octets
-        vect_command[6] = 0x04;  // 4 enregistrements
-        vect_command[7] = (byte) 0x80;
-        vect_command[8] = (byte) 0x00; //1000
-        vect_command[9] = (byte)0xAA;
-        vect_command[10] = 0x10;
-        smartCard.writeFile(vect_command);
+        smartCard.CreateFile(0x20,0x04,0x00, 0x00,0x80, (byte) 0xAA,(byte)  0x10);
+        byte[] nom_b =  Linker.get_pem();
+        smartCard.CreateFile(nom_b.length,0x01,0x01, 0x00,0x80, (byte)  0xAA,(byte) 0x11);
+        String file_AA12 =Linker.getPublicKey();
+        smartCard.CreateFile(file_AA12.length(),0x01,0x02, 0x40,0x80, (byte) 0xAA,(byte) 0x12);
         //phase 4:
         smartCard.selectFile((byte) 0xAA, (byte) 0x10,SW_user_files);
         String [] file_AA10 = new String [4];
@@ -71,7 +57,7 @@ public class Smart_main {
         System.out.println();
         int i;
         for (i =0; i <4; i ++) {
-            byte[] nom_b =  file_AA10 [ i ]. getBytes () ;
+            nom_b = file_AA10[i].getBytes();
             vect_command =new byte[5+file_AA10 [ i ].length()];
             vect_command [0]=(byte) 0x80;
             vect_command [1]=(byte) 0xD2;
@@ -115,32 +101,9 @@ public class Smart_main {
         smartCard.setCard(card);
         smartCard.setCanal(canal);
         smartCard.checkIc_Code();
-        byte[] nom_b =  Linker.get_pem();
-        String  label = "signature";
-        System.out.println(nom_b.length);
-        smartCard.selectFile( (byte) 0xFF, (byte) 0x04,SW_system_files);
-        vect_command = new byte[11];
-        vect_command[0] = (byte) 0x80;
-        vect_command[1] = (byte)0xD2;
-        vect_command[2] = 0x00;
-        vect_command[3] = 0x00;
-        vect_command[4] = 0x06;
-        vect_command[5] = (byte) nom_b.length;  // 128 octets
-        vect_command[6] = 0x01;  // 1 enregistrement
-        vect_command[7] = 0x00;//read
-        //=1000
-        vect_command[8] = (byte) 0x80;// security attribute for write 1000 0000 (IC_code)
-        vect_command[9] = (byte)0xAA;
-        vect_command[10] = 0x11;
-        smartCard.writeFile(vect_command);
+
         System.out.println("AA11");
-        //
-        //String msg_chiff=Md5.get_hash();
-        //read record and concatenate it + hash
-        smartCard.checkIc_Code();
-        smartCard.selectFile((byte) 0xAA, (byte) 0x11,SW_user_files);
-
-
+        smartCard.selectFile((byte) 0xAA, (byte) 0x11,0x9101);
         vect_command =new byte[5+nom_b.length];
         vect_command [0]=(byte) 0x80;
         vect_command [1]=(byte) 0xD2;
@@ -152,25 +115,12 @@ public class Smart_main {
         smartCard.checkIc_Code();
         smartCard.writeFile(vect_command);
         ///////////////////////////////////////////////////////////////////////////////////////
-        String file_AA12 =Linker.getPempls();
-        System.out.println(file_AA12);
-        smartCard.selectFile( (byte) 0xFF, (byte) 0x04,SW_system_files);
-        vect_command = new byte[11];
-        vect_command[0] = (byte) 0x80;
-        vect_command[1] = (byte)0xD2;
-        vect_command[2] = 0x00;
-        vect_command[3] = 0x00;
-        vect_command[4] = 0x06;
-        vect_command[5] = (byte) file_AA12.length();
-        vect_command[6] = 0x01;
-        vect_command[7] = (byte) 0x40;// security pin code
-        vect_command[8] = (byte) 0x80; //1000
-        vect_command[9] = (byte)0xAA;
-        vect_command[10] = 0x12;
-        smartCard.writeFile(vect_command);
-        //phase 4:
 
-        smartCard.selectFile((byte) 0xAA, (byte) 0x12,SW_user_files);
+
+        smartCard.selectFile((byte) 0xAA, (byte) 0x12,0x9102);
+        byte[] octetStr = file_AA12.getBytes("UTF-8");
+
+        System.out.println(octetStr.length);
         byte[] nom_c =  file_AA12. getBytes () ;
         vect_command =new byte[5+file_AA12.length()];
         vect_command [0]=(byte) 0x80;
@@ -181,8 +131,6 @@ public class Smart_main {
         for ( int j =0; j < nom_c . length ; j ++)
             vect_command [5+ j] = nom_c [j ];
         smartCard.writeFile(vect_command);
-
-
         System.out.println("done");
         smartCard.checkPincode();
         byte[] read_record ={(byte) 0x80 , (byte) 0xB2 , (byte) 0x00 ,
@@ -196,7 +144,7 @@ public class Smart_main {
         }
 
     }
-    private static Card check_card(CardTerminal lecteur) throws CardException {
+    public static Card check_card(CardTerminal lecteur) throws CardException {
         Card card = null;
         // attente de la carte
         while(!lecteur.isCardPresent()){
@@ -209,7 +157,7 @@ public class Smart_main {
         System.out.println(" Card ATR : "+byteArrayToHexString(card.getATR().getBytes()));
         return card;
     }
-    private static CardTerminal lecteur(){
+    public static CardTerminal lecteur(){
         TerminalFactory tf =TerminalFactory.getDefault();
         CardTerminals lecteurs = tf.terminals();
         CardTerminal lecteur = lecteurs.getTerminal("Gemalto Prox-DU Contact_12400704 0");
