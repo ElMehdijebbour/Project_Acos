@@ -1,1 +1,1 @@
-MD5(data.txt)= b0846a5eb63254f8bea90340046393c3
+MD5(data.txt)= 06f3722ef91cf55766c853d06bb8fd8b
