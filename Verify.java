@@ -7,7 +7,7 @@ import java.security.NoSuchAlgorithmException;
 import static projet_sesnum.Smart_main.check_card;
 import static projet_sesnum.Smart_main.lecteur;
 
-public class Read {
+public class Verify {
     private static byte [] APDU_IC_CODE = {(byte) 0x80,0x20,0x07,0x00, 0x08, 0x41, 0x43, 0x4F, 0x53, 0x54, 0x45, 0x53, 0x54};
     private static byte [] APDU_PIN_CODE = {(byte) 0x80,0x20,0x06,0x00, 0x08,0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08};
     private  static  int SW_system_files=  0x9000;
@@ -21,7 +21,7 @@ public class Read {
         String file_AA12 =Linker.getPublicKey();
         smartCard.setApduIcCode(APDU_IC_CODE);
         smartCard.checkIc_Code();
-        smartCard.selectFile((byte) 0xAA, (byte) 0x12,SW_user_files);
+        smartCard.selectFile((byte) 0xAA, (byte) 0x12,0x9102);
         smartCard.setApduPinCode(APDU_PIN_CODE);
         smartCard.checkPincode();
         byte[] read_record ={(byte) 0x80 , (byte) 0xB2 , (byte) 0x00 ,

@@ -90,7 +90,7 @@ public class SmartCardAcos {
         vect_command[1] = 0x30;
         ResponseAPDU rep =submit_APDU(vect_command);
         if (rep.getSW() == 0x9000){
-            System.out.println(" Ok, card cleared ! \nAll good Ready to GO! ");
+            System.out.println(" Ok, card cleared ! \n All good Ready to GO!\n ");
         }
         else
             System.out.println(" Error, card not cleared! ( 0x"+Integer.toHexString(rep.getSW())+")");

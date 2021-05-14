@@ -14,7 +14,7 @@ public class Smart_main {
     private  static  int SW_user_files=  0x9100;
     public static void main(String[] args) throws CardException, NoSuchAlgorithmException, IOException {
         //phase1 : Setup
-        System.out.println("Phase 1 starting now");
+        System.out.println("\nPhase 1 starting now: Initialisition de la carte:");
         CardTerminal lecteur = lecteur();
         Card card = check_card(lecteur);
         CardChannel canal = card.getBasicChannel();
@@ -22,16 +22,15 @@ public class Smart_main {
         smartCard.checkIc_Code();
         smartCard.clearCard();
         //phase 2 : write n of files to create to FF02 aka le fichier de personnalisation
-        System.out.println("Phase 2 starting now");
+        System.out.println("Phase 2 starting now: Personalisation FF02");
         smartCard.setApduIcCode(APDU_IC_CODE);
         smartCard.checkIc_Code();
         smartCard.selectFile((byte) 0xFF, (byte) 0x02,SW_system_files);
         byte[] vect_command={(byte) 0x80, (byte) 0xD2, 0x00, 0x00, 0x04, 0x00, 0x00, 0x03, 0x00};
-
         smartCard.writeFile(vect_command);
         card.disconnect(true);
         //phase 3 : changing FF04
-        System.out.println("Phase 3 starting now");
+        System.out.println("\nPhase 3 starting now: Creation des 3 fichiers AA10 AA11 AA12:");
         card = check_card(lecteur);
         canal = card.getBasicChannel();
         smartCard.setCard(card);
@@ -39,16 +38,16 @@ public class Smart_main {
         smartCard.checkIc_Code();
         smartCard.CreateFile(0x20,0x04,0x00, 0x00,0x80, (byte) 0xAA,(byte)  0x10);
         byte[] nom_b =  Linker.get_pem();
-        smartCard.CreateFile(nom_b.length,0x01,0x01, 0x00,0x80, (byte)  0xAA,(byte) 0x11);
         String file_AA12 =Linker.getPublicKey();
         smartCard.CreateFile(file_AA12.length(),0x01,0x02, 0x40,0x80, (byte) 0xAA,(byte) 0x12);
-        //phase 4:
+        smartCard.CreateFile(0x80,0x01,0x01, 0x00,0x80, (byte) 0xAA,(byte)  0x11);
+        System.out.println("\nPhase 4 starting now: Select/write dans le fichiers AA10:");
         smartCard.selectFile((byte) 0xAA, (byte) 0x10,SW_user_files);
         String [] file_AA10 = new String [4];
         file_AA10 [0]= " M";
         file_AA10 [1]= " JebbourDabachFigdal";
         file_AA10 [2]= " ID200130";
-        file_AA10 [3]= " 24/4/2021";
+        file_AA10 [3]= " 24/06/2023";
         String [] table = new String [4];
         table [0]= " Titre";
         table [1]= " Nom et Prenom";
@@ -82,9 +81,10 @@ public class Smart_main {
             }
         }
         Linker.writedata(data);
-        System . out . println ("donnes concatene:" + data);
+        System . out . println ("donnees concatene:" + data);
         card . disconnect (true);
         //phase 5: changing password
+        System.out.println("\nPhase 6 starting now: Change Pin code dans FF03 Security File");
         card = check_card(lecteur);
         canal = card.getBasicChannel();
         smartCard.setCard(card);
@@ -93,45 +93,37 @@ public class Smart_main {
         smartCard.setApduPinCode(APDU_PIN_CODE);
         smartCard.changePinCode(PIN_CODE);
         card.disconnect(true);
-        System.out.println("Phase 5 starting now");
-        //phase 6 : changing FF04
-        System.out.println("FF04");
+        System.out.println("\nPhase 7 starting now: Select/write dans le fichier AA11");
         card = check_card(lecteur);
         canal = card.getBasicChannel();
         smartCard.setCard(card);
         smartCard.setCanal(canal);
         smartCard.checkIc_Code();
-
-        System.out.println("AA11");
         smartCard.selectFile((byte) 0xAA, (byte) 0x11,0x9101);
         vect_command =new byte[5+nom_b.length];
         vect_command [0]=(byte) 0x80;
         vect_command [1]=(byte) 0xD2;
-        vect_command [2]=0x00; //numero d'enregistrement
-        vect_command [3]=0x00 ;
+        vect_command [2]=0x00;
+        vect_command [3]=0x00;
         vect_command [4]=(byte) nom_b.length;
         for ( int j =0; j < nom_b . length ; j ++)
             vect_command [5+ j] = nom_b [j ];
         smartCard.checkIc_Code();
         smartCard.writeFile(vect_command);
-        ///////////////////////////////////////////////////////////////////////////////////////
-
-
+        System.out.println("\nPhase 8 starting now: Select/write dans le fichiers AA12");
         smartCard.selectFile((byte) 0xAA, (byte) 0x12,0x9102);
         byte[] octetStr = file_AA12.getBytes("UTF-8");
-
-        System.out.println(octetStr.length);
+        System.out.println(" "+octetStr.length);
         byte[] nom_c =  file_AA12. getBytes () ;
         vect_command =new byte[5+file_AA12.length()];
         vect_command [0]=(byte) 0x80;
         vect_command [1]=(byte) 0xD2;
-        vect_command [2]=(byte) 0x00; //numero d'enregistrement
+        vect_command [2]=(byte) 0x00;
         vect_command [3]=0x00 ;
         vect_command [4]=(byte) file_AA12.length();
         for ( int j =0; j < nom_c . length ; j ++)
             vect_command [5+ j] = nom_c [j ];
         smartCard.writeFile(vect_command);
-        System.out.println("done");
         smartCard.checkPincode();
         byte[] read_record ={(byte) 0x80 , (byte) 0xB2 , (byte) 0x00 ,
                 0x00 , (byte) file_AA12.length() };
@@ -140,9 +132,9 @@ public class Smart_main {
         if ( rep . getSW () == 0x9000 )
         {
             System . out . print (" Ok read file AA12 "+":\n");
-            System . out . println (new String(rep.getData()));
+            System . out . println (" " + new String(rep.getData()));
         }
-
+        System.out.println(" Done");
     }
     public static Card check_card(CardTerminal lecteur) throws CardException {
         Card card = null;

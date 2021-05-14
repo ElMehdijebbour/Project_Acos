@@ -6,8 +6,6 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.security.NoSuchAlgorithmException;
 import java.io.File;  // Import the File class
-
-
 class Linker
 {
     public static void main(String[] args) throws IOException, NoSuchAlgorithmException {
@@ -46,14 +44,14 @@ class Linker
             String path ="src\\projet_sesnum\\data\\data.txt";
             File myObj = new File(path);
             if (myObj.createNewFile()) {
-                System.out.println("File created: " + myObj.getName());
+                System.out.println(" File created: " + myObj.getName());
             } else {
-                System.out.println("File already exists.");
+                System.out.println(" File already exists.");
             }
             FileWriter myWriter = new FileWriter(path);
             myWriter.write(data);
             myWriter.close();
-            System.out.println("Successfully wrote to the file.");
+            System.out.println(" Successfully wrote to the file.");
         } catch (IOException e) {
             System.out.println("An error occurred.");
             e.printStackTrace();
