@@ -31,7 +31,7 @@ class Linker
         return  fileBytes;
     }
     public static String getPublicKey() throws NoSuchAlgorithmException, IOException {
-        String fileName = "src/projet_sesnum/security/keys/keys/rsapublickey.pem";
+        String fileName = "src/projet_sesnum/security/keys/key pair/rsapublickey.pem";
         File file = new File(fileName);
 
         String pem = new String(Files.readAllBytes(file.toPath()), Charset.defaultCharset());
